@@ -339,8 +339,11 @@ def send(binary):
         c_retval_list = sorted(c_retval_list, key=lambda x: x[0])
         c_retval_list = [x[1] for x in c_retval_list]
         for out in c_retval_list:
+            print(out)
             clients_output.append(extractOutputSuccess('RECEIVED', out, mode='all'))
-        server_output = extractOutputSuccess('RELAYED', s_retval_q.get(), mode='all')
+        server_raw_output = s_retval_q.get()
+        print(server_raw_output)
+        server_output = extractOutputSuccess('RELAYED', server_raw_output, mode='all')
 
         server_output = [parseRELAYED(output) for output in server_output]
         client_output = []
@@ -348,8 +351,10 @@ def send(binary):
             output = [parseRECEIVED(msg) for msg in client]
             client_output.append(output)
 
+        # print(client_output, server_output)
         expected_server_output = send_server_output(send_server, server_list, short_msg, big_msg)
         expected_client_output = send_client_output(send_server, server_list, short_msg, big_msg)
+        print(expected_client_output, expected_server_output)
 
         #Match Server Output
         for srv_msg, exp_msg in itertools.izip(server_output, expected_server_output):
@@ -632,7 +637,12 @@ def buffer(binary):
     #Query 2
     message = ['LOGFILE', binary, str(recv_server_port)]
     server_output_2 = run_on_server(recv_server, message)
+    print "client", server_output_2
+    print "server", server_output_1
 
+
+    print("server_output_1", len(extractOutputSuccess('RECEIVED', server_output_1, mode='all')))
+    print("server_output_2", len(extractOutputSuccess('RECEIVED', server_output_2, mode='all')))
     if len(extractOutputSuccess('RECEIVED', server_output_1, mode='all')) == 0:
         if len(extractOutputSuccess('RECEIVED', server_output_2, mode='all')) == 5: score += 5.0
 
